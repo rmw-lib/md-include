@@ -12,7 +12,7 @@ var q = require('q');
 
 this.ignoreTag = ' !ignore';
 this.headingTag = ' !heading';
-this.includePattern = /^#include\s"([\w\.\-\_\d]+)"/gm;
+this.includePattern = /^#include\s+([\/\d\.\w\b]+)\s*$/gm;
 this.ignorePattern = new RegExp('^#include\\s"(.+\\/|\\/|\\w|-|\\/)+\.(md|markdown)"' + this.ignoreTag, 'gm');
 this.headingPattern = new RegExp('^#+\\s.+' + this.headingTag, 'gm');
 this.tableOfContents = '';
@@ -192,7 +192,6 @@ exports.findHeadingTags = function (parsedData) {
 exports.findIncludeTags = function (rawData) {
   var ignores = rawData.match(this.ignorePattern) || [];
   var includes = rawData.match(this.includePattern) || [];
-
   if (includes.length > 0 && ignores.length > 0) {
     var i;
 
@@ -244,10 +243,7 @@ exports.parseHeadingTag = function (headingTag) {
  * @return {String}     A file path
  */
 exports.parseIncludeTag = function (tag) {
-  var firstQuote = tag.indexOf('"') + 1;
-  var lastQuote = tag.lastIndexOf('"');
-
-  return tag.substring(firstQuote, lastQuote);
+  return tag.slice(9).trim();
 };
 
 /**
@@ -293,7 +289,6 @@ exports.processIncludeTags = function (file, currentFile, tags) {
 
   for (i = 0; i < tags.length; i += 1) {
     var includeFile = this.parseIncludeTag(tags[i]);
-
     if (includeFile === currentFile) {
       throw new Error('Circular injection ' + file + ' -> ' + includeFile + ' -> ' + file);
     }
@@ -438,14 +433,15 @@ exports.stripTagsInFile = function (obj) {
  */
 exports.writeFile = function (parsedData) {
   var deferred = q.defer();
+  parsedData = `<!-- 本文件由 ${this.options.files.join(' ')} 自动生成，请不要直接修改此文件 -->\n\n`+parsedData;
 
-  fs.writeFile(this.options.build, parsedData, function (err) {
-    if (err) {
-      throw err;
-    }
+    fs.writeFile(this.options.build, parsedData, function (err) {
+      if (err) {
+        throw err;
+      }
 
-    deferred.resolve(parsedData);
-  });
+      deferred.resolve(parsedData);
+    });
 
-  return deferred.promise;
-};
+      return deferred.promise;
+    };
