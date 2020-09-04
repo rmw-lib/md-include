@@ -1,11 +1,11 @@
 {
-  "name": "markdown-include",
+  "name": "@rmw/md-include",
   "version": "0.4.3",
   "description": "Include markdown files into other markdown files with C style syntax.",
   "main": "markdown-include.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/sethen/markdown-include.git"
+    "url": "https://github.com/rmw-lib/md-include.git"
   },
   "keywords": [
     "markdown-include",
@@ -13,14 +13,14 @@
     "include"
   ],
   "bin": {
-    "markdown-include": "./bin/cli.js"
+    "md-include": "./bin/cli.js"
   },
   "author": "Sethen Maleno",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/sethen/markdown-include/issues"
+    "url": "https://github.com/rmw-lib/md-include/issues"
   },
-  "homepage": "https://github.com/sethen/markdown-include",
+  "homepage": "https://github.com/rmw-lib/md-include",
   "devDependencies": {
     "intern": "^2.2.2"
   },

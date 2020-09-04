@@ -12,7 +12,7 @@ var q = require('q');
 
 this.ignoreTag = ' !ignore';
 this.headingTag = ' !heading';
-this.includePattern = /^#include\s"(.+\/|\/|\w|-|\/)+\.(md|markdown)"/gm;
+this.includePattern = /^#include\s"([\w\.\-\_\d]+)"/gm;
 this.ignorePattern = new RegExp('^#include\\s"(.+\\/|\\/|\\w|-|\\/)+\.(md|markdown)"' + this.ignoreTag, 'gm');
 this.headingPattern = new RegExp('^#+\\s.+' + this.headingTag, 'gm');
 this.tableOfContents = '';
@@ -25,36 +25,36 @@ this.customTags = [];
  * @return {String}     String for markdown navigation item
  */
 exports.buildContentItem = function (obj) {
-	var headingTag = obj.headingTag;
-	var count = obj.count;
-	var item = headingTag.substring(count + 1);
-	var index = headingTag.indexOf(item);
-	var headingTrimmed = this.buildLinkString(headingTag.substring(index));
-	var lead = this.options.tableOfContents.lead && this.options.tableOfContents.lead === 'number' ? '1.' : '*';
-	var navItem;
+  var headingTag = obj.headingTag;
+  var count = obj.count;
+  var item = headingTag.substring(count + 1);
+  var index = headingTag.indexOf(item);
+  var headingTrimmed = this.buildLinkString(headingTag.substring(index));
+  var lead = this.options.tableOfContents.lead && this.options.tableOfContents.lead === 'number' ? '1.' : '*';
+  var navItem;
 
-	switch (obj.count) {
-		case 1:
-			navItem = lead + ' ' + this.buildLink(item, headingTrimmed);
-		break;
-		case 2:
-			navItem = '  ' + lead + ' ' + this.buildLink(item, headingTrimmed);
-		break;
-		case 3:
-			navItem = '    ' + lead + ' ' + this.buildLink(item, headingTrimmed);
-		break;
-		case 4:
-			navItem = '      ' + lead + ' ' + this.buildLink(item, headingTrimmed);
-		break;
-		case 5:
-			navItem = '        ' + lead + ' ' + this.buildLink(item, headingTrimmed);
-		break;
-		case 6:
-			navItem = '          ' + lead + ' ' + this.buildLink(item, headingTrimmed);
-		break;
-	}
+  switch (obj.count) {
+    case 1:
+      navItem = lead + ' ' + this.buildLink(item, headingTrimmed);
+      break;
+    case 2:
+      navItem = '  ' + lead + ' ' + this.buildLink(item, headingTrimmed);
+      break;
+    case 3:
+      navItem = '    ' + lead + ' ' + this.buildLink(item, headingTrimmed);
+      break;
+    case 4:
+      navItem = '      ' + lead + ' ' + this.buildLink(item, headingTrimmed);
+      break;
+    case 5:
+      navItem = '        ' + lead + ' ' + this.buildLink(item, headingTrimmed);
+      break;
+    case 6:
+      navItem = '          ' + lead + ' ' + this.buildLink(item, headingTrimmed);
+      break;
+  }
 
-	return navItem;
+  return navItem;
 };
 
 /**
@@ -64,7 +64,7 @@ exports.buildContentItem = function (obj) {
  * @return {String}         Markdown style link
  */
 exports.buildLink = function (title, anchor) {
-	return '[' + title + '](#' + anchor + ')\n';
+  return '[' + title + '](#' + anchor + ')\n';
 };
 
 
@@ -74,34 +74,34 @@ exports.buildLink = function (title, anchor) {
  * @return {String}     String for link
  */
 exports.buildLinkString = function (str) {
-	var linkPatterns = {
-		backtick: {
-			pattern: /`/g,
-			replace: ''
-		},
-		dot: {
-			pattern: /\./g,
-			replace: '',
-		},
-		stick: {
-			pattern: /\|/g,
-			replace: ''
-		}
-	};
-	var key;
+  var linkPatterns = {
+    backtick: {
+      pattern: /`/g,
+      replace: ''
+    },
+    dot: {
+      pattern: /\./g,
+      replace: '',
+    },
+    stick: {
+      pattern: /\|/g,
+      replace: ''
+    }
+  };
+  var key;
 
-	for (key in linkPatterns) {
-		if (linkPatterns.hasOwnProperty(key)) {
-			var pattern = linkPatterns[key].pattern;
-			var replace = linkPatterns[key].replace || ' ';
+  for (key in linkPatterns) {
+    if (linkPatterns.hasOwnProperty(key)) {
+      var pattern = linkPatterns[key].pattern;
+      var replace = linkPatterns[key].replace || ' ';
 
-			if (pattern.test(str)) {
-				str = str.replace(pattern, replace);
-			}
-		}
-	}
+      if (pattern.test(str)) {
+        str = str.replace(pattern, replace);
+      }
+    }
+  }
 
-	return str.trim().split(' ').join('-').toLowerCase();
+  return str.trim().split(' ').join('-').toLowerCase();
 };
 
 /**
@@ -110,45 +110,45 @@ exports.buildLinkString = function (str) {
  * @return {Object}      Promise to be resolved
  */
 exports.compileFiles = function (path) {
-	var deferred = q.defer();
-	var self = this;
+  var deferred = q.defer();
+  var self = this;
 
-	fs.readFile(path, function (err, data) {
-		if (err) {
-			throw err;
-		}
+  fs.readFile(path, function (err, data) {
+    if (err) {
+      throw err;
+    }
 
-		self.options = JSON.parse(data.toString());
-		var files = self.options.files;
-		var i;
+    self.options = JSON.parse(data.toString());
+    var files = self.options.files;
+    var i;
 
-		for (i = 0; i < files.length; i += 1) {
-			var file = files[i];
+    for (i = 0; i < files.length; i += 1) {
+      var file = files[i];
 
-			self.processFile(file);
-			self.build[file].parsedData = self.stripTagsInFile({
-				data: self.build[file].parsedData,
-				pattern: self.ignorePattern,
-				string: self.ignoreTag
-			});
+      self.processFile(file);
+      self.build[file].parsedData = self.stripTagsInFile({
+        data: self.build[file].parsedData,
+        pattern: self.ignorePattern,
+        string: self.ignoreTag
+      });
 
-			if (self.options.tableOfContents) {
-				self.compileHeadingTags(file);
+      if (self.options.tableOfContents) {
+        self.compileHeadingTags(file);
 
-				if (self.options.tableOfContents.heading && self.tableOfContents) {
-					self.build[file].parsedData = self.options.tableOfContents.heading + '\n\n' + self.tableOfContents + '\n\n' + self.build[file].parsedData;
-				}
-			}
-		}
+        if (self.options.tableOfContents.heading && self.tableOfContents) {
+          self.build[file].parsedData = self.options.tableOfContents.heading + '\n\n' + self.tableOfContents + '\n\n' + self.build[file].parsedData;
+        }
+      }
+    }
 
-		if (self.customTags && self.customTags.length) {
-			self.build[file].parsedData = self.resolveCustomTags(self.build[file].parsedData);
-		}
+    if (self.customTags && self.customTags.length) {
+      self.build[file].parsedData = self.resolveCustomTags(self.build[file].parsedData);
+    }
 
-		deferred.resolve(self.writeFile(self.build[file].parsedData));
-	});
+    deferred.resolve(self.writeFile(self.build[file].parsedData));
+  });
 
-	return deferred.promise;
+  return deferred.promise;
 };
 
 /**
@@ -157,22 +157,22 @@ exports.compileFiles = function (path) {
  * @return {Void}        Undefined
  */
 exports.compileHeadingTags = function (file) {
-	var headingTags = this.findHeadingTags(this.build[file].parsedData);
-	var replacedHeadingTag;
-	var parsedHeading;
-	var i;
+  var headingTags = this.findHeadingTags(this.build[file].parsedData);
+  var replacedHeadingTag;
+  var parsedHeading;
+  var i;
 
-	for (i = 0; i < headingTags.length; i += 1) {
-		replacedHeadingTag = headingTags[i].replace(this.headingTag, '');
-		parsedHeading = this.parseHeadingTag(replacedHeadingTag);
-		this.tableOfContents += this.buildContentItem(parsedHeading);
-	}
+  for (i = 0; i < headingTags.length; i += 1) {
+    replacedHeadingTag = headingTags[i].replace(this.headingTag, '');
+    parsedHeading = this.parseHeadingTag(replacedHeadingTag);
+    this.tableOfContents += this.buildContentItem(parsedHeading);
+  }
 
-	this.build[file].parsedData = this.stripTagsInFile({
-		data: this.build[file].parsedData,
-		pattern: this.headingPattern,
-		string: this.headingTag
-	});
+  this.build[file].parsedData = this.stripTagsInFile({
+    data: this.build[file].parsedData,
+    pattern: this.headingPattern,
+    string: this.headingTag
+  });
 };
 
 /**
@@ -181,7 +181,7 @@ exports.compileHeadingTags = function (file) {
  * @return {Array}             Array of matching heading tags
  */
 exports.findHeadingTags = function (parsedData) {
-	return parsedData.match(this.headingPattern) || [];
+  return parsedData.match(this.headingPattern) || [];
 };
 
 /**
@@ -190,27 +190,27 @@ exports.findHeadingTags = function (parsedData) {
  * @return {Array}          Array containing found include tags
  */
 exports.findIncludeTags = function (rawData) {
-	var ignores = rawData.match(this.ignorePattern) || [];
-	var includes = rawData.match(this.includePattern) || [];
+  var ignores = rawData.match(this.ignorePattern) || [];
+  var includes = rawData.match(this.includePattern) || [];
 
-	if (includes.length > 0 && ignores.length > 0) {
-		var i;
+  if (includes.length > 0 && ignores.length > 0) {
+    var i;
 
-		for (i = 0; i < ignores.length; i += 1) {
-			var testIncludeString = this.stripTag({
-				tag: ignores[i],
-				pattern: this.ignoreTag
-			});
+    for (i = 0; i < ignores.length; i += 1) {
+      var testIncludeString = this.stripTag({
+        tag: ignores[i],
+        pattern: this.ignoreTag
+      });
 
-			var index = includes.indexOf(testIncludeString);
+      var index = includes.indexOf(testIncludeString);
 
-			if (index > -1) {
-				includes.splice(index, 1);
-			}
-		}
-	}
+      if (index > -1) {
+        includes.splice(index, 1);
+      }
+    }
+  }
 
-	return includes;
+  return includes;
 };
 
 /**
@@ -219,23 +219,23 @@ exports.findIncludeTags = function (rawData) {
  * @return {Object}            Object consisting of key value pairs describing heading tag
  */
 exports.parseHeadingTag = function (headingTag) {
-	var count = 0;
-	var i;
+  var count = 0;
+  var i;
 
-	for (i = 0; i < headingTag.length; i += 1) {
-		if (headingTag[i] === '#') {
-			count += 1;
-		}
-		else {
-			break;
-		}
-	}
+  for (i = 0; i < headingTag.length; i += 1) {
+    if (headingTag[i] === '#') {
+      count += 1;
+    }
+    else {
+      break;
+    }
+  }
 
-	// Do we need to return the heading tag??
-	return {
-		count: count,
-		headingTag: headingTag
-	};
+  // Do we need to return the heading tag??
+  return {
+    count: count,
+    headingTag: headingTag
+  };
 };
 
 /**
@@ -244,10 +244,10 @@ exports.parseHeadingTag = function (headingTag) {
  * @return {String}     A file path
  */
 exports.parseIncludeTag = function (tag) {
-	var firstQuote = tag.indexOf('"') + 1;
-	var lastQuote = tag.lastIndexOf('"');
+  var firstQuote = tag.indexOf('"') + 1;
+  var lastQuote = tag.lastIndexOf('"');
 
-	return tag.substring(firstQuote, lastQuote);
+  return tag.substring(firstQuote, lastQuote);
 };
 
 /**
@@ -257,27 +257,27 @@ exports.parseIncludeTag = function (tag) {
  * @return {Void}               Undefined
  */
 exports.processFile = function (file, currentFile) {
-	if (file in this.build) {
-		this.replaceIncludeTags(file);
-	}
-	else {
-		var rawData = fs.readFileSync(file).toString();
-		var includeTags = this.findIncludeTags(rawData);
-		var files = includeTags.length ? this.processIncludeTags(file, currentFile, includeTags) : null;
+  if (file in this.build) {
+    this.replaceIncludeTags(file);
+  }
+  else {
+    var rawData = fs.readFileSync(file).toString();
+    var includeTags = this.findIncludeTags(rawData);
+    var files = includeTags.length ? this.processIncludeTags(file, currentFile, includeTags) : null;
 
-		this.build[file] = {
-			files: files,
-			includeTags: includeTags,
-			rawData: rawData
-		};
+    this.build[file] = {
+      files: files,
+      includeTags: includeTags,
+      rawData: rawData
+    };
 
-		if (files && includeTags) {
-			this.build[file].parsedData = this.replaceIncludeTags(file);
-		}
-		else {
-			this.build[file].parsedData = rawData;
-		}
-	}
+    if (files && includeTags) {
+      this.build[file].parsedData = this.replaceIncludeTags(file);
+    }
+    else {
+      this.build[file].parsedData = rawData;
+    }
+  }
 };
 
 /**
@@ -288,33 +288,33 @@ exports.processFile = function (file, currentFile) {
  * @return {Array}              Collection of files parsed from include tags
  */
 exports.processIncludeTags = function (file, currentFile, tags) {
-	var collection = [];
-	var i;
+  var collection = [];
+  var i;
 
-	for (i = 0; i < tags.length; i += 1) {
-		var includeFile = this.parseIncludeTag(tags[i]);
+  for (i = 0; i < tags.length; i += 1) {
+    var includeFile = this.parseIncludeTag(tags[i]);
 
-		if (includeFile === currentFile) {
-			throw new Error('Circular injection ' + file + ' -> ' + includeFile + ' -> ' + file);
-		}
+    if (includeFile === currentFile) {
+      throw new Error('Circular injection ' + file + ' -> ' + includeFile + ' -> ' + file);
+    }
 
-		collection.push(includeFile);
-		this.processFile(includeFile, file);
-	}
+    collection.push(includeFile);
+    this.processFile(includeFile, file);
+  }
 
-	return collection;
+  return collection;
 };
 
 exports.registerPlugin = function () {
-	if (arguments[0].pattern && arguments[0].replace) {
-		this.customTags.push(arguments[0]);
-	}
-	else {
-		this.customTags.push({
-			pattern: arguments[0],
-			replace: arguments[1]
-		});
-	}
+  if (arguments[0].pattern && arguments[0].replace) {
+    this.customTags.push(arguments[0]);
+  }
+  else {
+    this.customTags.push({
+      pattern: arguments[0],
+      replace: arguments[1]
+    });
+  }
 };
 
 /**
@@ -323,23 +323,23 @@ exports.registerPlugin = function () {
  * @return {String}      Replaced file content
  */
 exports.replaceIncludeTags = function (file) {
-	var obj = this.build[file];
-	var replacedData;
-	var i;
+  var obj = this.build[file];
+  var replacedData;
+  var i;
 
-	for (i = 0; i < obj.includeTags.length; i += 1) {
-		var includeTag = obj.includeTags[i];
-		var currentFile = obj.files[i];
+  for (i = 0; i < obj.includeTags.length; i += 1) {
+    var includeTag = obj.includeTags[i];
+    var currentFile = obj.files[i];
 
-		if (replacedData) {
-			replacedData = replacedData.replace(includeTag, this.build[currentFile].parsedData);
-		}
-		else {
-			replacedData = obj.rawData.replace(includeTag, this.build[currentFile].parsedData);
-		}
-	}
+    if (replacedData) {
+      replacedData = replacedData.replace(includeTag, this.build[currentFile].parsedData);
+    }
+    else {
+      replacedData = obj.rawData.replace(includeTag, this.build[currentFile].parsedData);
+    }
+  }
 
-	return replacedData;
+  return replacedData;
 };
 
 /**
@@ -348,35 +348,35 @@ exports.replaceIncludeTags = function (file) {
  * @return {String}     Replaced string
  */
 exports.replaceWith = function (obj) {
-	var replaced = obj.string.substr(0, obj.index) + obj.replacement;
+  var replaced = obj.string.substr(0, obj.index) + obj.replacement;
 
-	if (obj.preserve) {
-		return replaced + obj.string.substr(obj.index, obj.string.length);
-	}
+  if (obj.preserve) {
+    return replaced + obj.string.substr(obj.index, obj.string.length);
+  }
 
-	return replaced;
+  return replaced;
 };
 
 exports.resolveCustomTags = function (data) {
-	if (data) {
-		var k;
+  if (data) {
+    var k;
 
-		for (k = 0; k < this.customTags.length; k += 1) {
-			var customTagObj = this.customTags[k];
-			var replacedData;
+    for (k = 0; k < this.customTags.length; k += 1) {
+      var customTagObj = this.customTags[k];
+      var replacedData;
 
-			if (replacedData) {
-				customTagObj.data = replacedData;
-			}
-			else {
-				customTagObj.data = data;
-			}
+      if (replacedData) {
+        customTagObj.data = replacedData;
+      }
+      else {
+        customTagObj.data = data;
+      }
 
-			replacedData = this.stripTagsInFile(customTagObj);
-		}
+      replacedData = this.stripTagsInFile(customTagObj);
+    }
 
-		return replacedData;
-	}
+    return replacedData;
+  }
 };
 
 /**
@@ -385,7 +385,7 @@ exports.resolveCustomTags = function (data) {
  * @return {String}     String stripped
  */
 exports.stripTag = function (obj) {
-	return obj.tag.replace(obj.pattern, '');
+  return obj.tag.replace(obj.pattern, '');
 };
 
 /**
@@ -394,41 +394,41 @@ exports.stripTag = function (obj) {
  * @return {String}     Replaced data from object keys
  */
 exports.stripTagsInFile = function (obj) {
-	var replacedData;
+  var replacedData;
 
-	if (obj.pattern.test(obj.data)) {
-		var patterns = obj.data.match(obj.pattern);
-		var i;
+  if (obj.pattern.test(obj.data)) {
+    var patterns = obj.data.match(obj.pattern);
+    var i;
 
-		for (i = 0; i < patterns.length; i += 1) {
-			var currentPattern = patterns[i];
-			var replacedTag;
+    for (i = 0; i < patterns.length; i += 1) {
+      var currentPattern = patterns[i];
+      var replacedTag;
 
-			if (obj.replace) {
-				replacedTag = (typeof obj.replace === 'function') ? obj.replace(currentPattern) : obj.replace;
-			}
-			else {
-				var index = currentPattern.indexOf(obj.string);
+      if (obj.replace) {
+        replacedTag = (typeof obj.replace === 'function') ? obj.replace(currentPattern) : obj.replace;
+      }
+      else {
+        var index = currentPattern.indexOf(obj.string);
 
-				replacedTag = this.replaceWith({
-					string: currentPattern,
-					index: index,
-					replacement: ''
-				});
-			}
+        replacedTag = this.replaceWith({
+          string: currentPattern,
+          index: index,
+          replacement: ''
+        });
+      }
 
-			if (replacedData) {
-				replacedData = replacedData.replace(currentPattern, replacedTag);
-			}
-			else {
-				replacedData = obj.data.replace(currentPattern, replacedTag);
-			}
-		}
+      if (replacedData) {
+        replacedData = replacedData.replace(currentPattern, replacedTag);
+      }
+      else {
+        replacedData = obj.data.replace(currentPattern, replacedTag);
+      }
+    }
 
-		return replacedData;
-	}
+    return replacedData;
+  }
 
-	return obj.data;
+  return obj.data;
 };
 
 /**
@@ -437,15 +437,15 @@ exports.stripTagsInFile = function (obj) {
  * @return {Object}            Promise to be resolved
  */
 exports.writeFile = function (parsedData) {
-	var deferred = q.defer();
+  var deferred = q.defer();
 
-	fs.writeFile(this.options.build, parsedData, function (err) {
-		if (err) {
-			throw err;
-		}
+  fs.writeFile(this.options.build, parsedData, function (err) {
+    if (err) {
+      throw err;
+    }
 
-		deferred.resolve(parsedData);
-	});
+    deferred.resolve(parsedData);
+  });
 
-	return deferred.promise;
+  return deferred.promise;
 };
