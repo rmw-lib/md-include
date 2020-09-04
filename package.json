@@ -1,6 +1,6 @@
 {
   "name": "@rmw/md-include",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "description": "Include markdown files into other markdown files with C style syntax.",
   "main": "markdown-include.js",
   "repository": {
